@@ -1,0 +1,10 @@
+image to pdf problem: rotating images that are not rotated by default.
+
+next do same thing done for excel2pdf for powerpoint2pdf (done).
+
+remain html to pdf for multiple (using libreoffice).
+
+pdf to jpg multiple needs implementation.
+
+pdf to excel converted_files.zip is stored in the cwd instead of /tmp.
+

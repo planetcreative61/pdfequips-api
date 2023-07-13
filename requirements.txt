@@ -1,0 +1,7 @@
+Flask
+PyPDF2
+Pillow
+tabula-py
+pandas
+pdf2docx
+Werkzeug
