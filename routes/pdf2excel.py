@@ -2,7 +2,9 @@ from flask import jsonify, request
 from utils.utils import validate_file
 from pdf2excel_converter import pdf_to_excel, pdf_to_excel_multiple
 
-
+"""
+    i want another function like this but for /pdf-to-text
+"""
 def pdf_to_excel_route(app):
     @app.route('/pdf-to-excel', methods=['POST'])
     def convert_pdf_to_excel():
