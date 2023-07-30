@@ -1,6 +1,6 @@
 import os
 import tempfile
-from flask import send_file
+from flask import send_file, after_this_request
 from werkzeug.datastructures import FileStorage
 from pdf2docx import Converter
 import zipfile
@@ -22,14 +22,20 @@ def pdf_to_pptx(file_storage: FileStorage):
     converter = Converter(temp_pdf_path)
     converter.convert(temp_pptx_path)
     converter.close()
-
+    response = send_file(temp_pptx_path, as_attachment=True, download_name='converted.pptx',
+                         mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation')
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['Connection'] = 'close'
     # Delete the temporary PDF file
-    os.remove(temp_pdf_path)
+
+    @after_this_request
+    def remove_file(response):
+        os.remove(temp_pptx.name)
+        os.remove(temp_pdf.name)
+        return response
 
     # Return the converted PPTX file using Flask's send_file
-    return send_file(temp_pptx_path, as_attachment=True, download_name='converted.pptx', mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation')
-
-
+    return response
 
 
 def pdf_to_pptx_multiple(files):
@@ -54,8 +60,12 @@ def pdf_to_pptx_multiple(files):
             # Delete the temporary PDF file
             os.remove(temp_pdf_path)
 
-            # Move the converted PPTX file to the temporary folder
-            shutil.move(temp_pptx_path, os.path.join(temp_dir, f'{file_storage.filename}.pptx'))
+            # Get the filename without the extension
+            filename_without_ext, _ = os.path.splitext(file_storage.filename)
+
+            # Move the converted PPTX file to the temporary folder with the new name
+            shutil.move(temp_pptx_path, os.path.join(
+                temp_dir, f'{filename_without_ext}.pptx'))
 
         # Create a zip file containing the converted PPTX files
         zip_buffer = BytesIO()
@@ -65,6 +75,10 @@ def pdf_to_pptx_multiple(files):
 
         # Set the buffer's file pointer to the beginning of the file
         zip_buffer.seek(0)
+        response = send_file(zip_buffer, as_attachment=True,
+                             download_name='converted_files.zip', mimetype='application/zip')
+        response.headers['Cache-Control'] = 'no-cache'
+        response.headers['Connection'] = 'close'
 
         # Return the zip file for download
-        return send_file(zip_buffer, as_attachment=True, download_name='converted_files.zip', mimetype='application/zip')
+        return response

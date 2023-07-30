@@ -1,16 +1,14 @@
 # Making sure we have the necessary imports:
 # pip install opencv-python-headless
-from flask_cors import CORS
-from flask import Flask, request, send_file
-from flask import Flask, request, send_from_directory, jsonify
-import os
+# from flask_cors import CORS
+from flask import Flask
+
 
 from jinja2 import FileSystemLoader
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from routes.compresspdf_route import compress_pdf_route
 from routes.excel2pdf import excel_to_pdf_route
-from routes.get_routes import get_routes_handler
 from routes.html2pdf import html_to_pdf_route
 # from . import img2pdf
 
@@ -40,7 +38,7 @@ logging.basicConfig(filename='app.log', level=logging.DEBUG)
 app = Flask(__name__)
 
 # cors
-CORS(app)
+# CORS(app)
 
 
 # setting templates directory for get routes
@@ -62,8 +60,6 @@ pdf_to_excel_route(app)
 pdf_to_ppt_route(app)
 compress_pdf_route(app)
 pdf_to_text_route(app)
-# get routes;
-get_routes_handler(app)
 # other pdf tool routes
 merge_pdfs_route(app)
 if __name__ == "__main__":

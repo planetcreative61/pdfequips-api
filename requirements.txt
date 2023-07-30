@@ -5,3 +5,4 @@ tabula-py
 pandas
 pdf2docx
 Werkzeug
+openpyxl

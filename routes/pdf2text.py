@@ -1,13 +1,9 @@
-from flask import request, jsonify, send_file
+from flask import request, jsonify, send_file, after_this_request
 from pdf2text_converter import pdf_to_text, pdf_to_text_multiple
 from utils.utils import validate_file
 import os
 from tempfile import NamedTemporaryFile
 
-"""
-    this function right now, is converting all the pdf files into one txt file if multiple files are uploaded
-    instead it should return a zip folder containing each converted txt file in it.
-"""
 
 def pdf_to_text_route(app):
     @app.route('/pdf-to-text', methods=['POST'])
@@ -28,7 +24,27 @@ def pdf_to_text_route(app):
                 tmp_file.write(text)
                 tmp_file.flush()
                 os.fsync(tmp_file.fileno())
-            return send_file(tmp_file.name, mimetype='text/plain', as_attachment=True, download_name='output.txt')
+            response = send_file(tmp_file.name, mimetype='text/plain', as_attachment=True, download_name='output.txt', conditional=True)
+            response.headers['X-Accel-Buffering'] = 'no'
+            response.headers['Cache-Control'] = 'no-cache'
+            response.headers['Connection'] = 'close'
+            
+            @after_this_request
+            def remove_file(response):
+                os.remove(tmp_file.name)
+                return response
+            
+            return response
         else:
             zip_file = pdf_to_text_multiple(files)
-            return send_file(zip_file.name, mimetype='application/zip', as_attachment=True, download_name='output.zip')
+            response = send_file(zip_file.name, mimetype='application/zip', as_attachment=True, download_name='output.zip', conditional=True)
+            response.headers['X-Accel-Buffering'] = 'no'
+            response.headers['Cache-Control'] = 'no-cache'
+            response.headers['Connection'] = 'close'
+            
+            @after_this_request
+            def remove_file(response):
+                os.remove(zip_file.name)
+                return response
+            
+            return response

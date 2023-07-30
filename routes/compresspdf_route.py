@@ -10,12 +10,13 @@ import os
     is it possible to do this in a finally block for example?
 """
 
+
 def compress_pdf_route(app):
     @app.route('/compress-pdf', methods=['POST'])
     def compress_pdf_handler():
         if 'files' not in request.files:
             return jsonify({"error": "No PDF file provided"}), 400
-        file = request.files['files']
+        file = request.files.getlist("files")[0]
         error = validate_file(file)
         compressed_file = None
         if error:
@@ -36,7 +37,7 @@ def compress_pdf_route(app):
             print(file.filename, compressed_file)
             if file.filename is not None and os.path.exists(file.filename):
                 os.remove(file.filename)
-            
+
             # Delete the compressed PDF file
             # this is not removing the compressed_file i want to delete it.
             if compressed_file is not None:
