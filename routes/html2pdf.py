@@ -3,7 +3,7 @@ from html2pdf_converter import html_to_pdf, html_to_pdf_multiple
 from utils.utils import validate_file
 
 def html_to_pdf_route(app):
-    @app.route('/html-to-pdf', methods=['POST'])
+    @app.route('/api/html-to-pdf', methods=['POST'])
     def convert_html_to_pdf():
         files = request.files.getlist("files")
         error = validate_file(files)

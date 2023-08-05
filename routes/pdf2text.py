@@ -6,7 +6,7 @@ from tempfile import NamedTemporaryFile
 
 
 def pdf_to_text_route(app):
-    @app.route('/pdf-to-text', methods=['POST'])
+    @app.route('/api/pdf-to-text', methods=['POST'])
     def convert_pdf_to_text():
         if 'files' not in request.files:
             return jsonify({"error": "No PDF file provided"}), 400
@@ -24,27 +24,29 @@ def pdf_to_text_route(app):
                 tmp_file.write(text)
                 tmp_file.flush()
                 os.fsync(tmp_file.fileno())
-            response = send_file(tmp_file.name, mimetype='text/plain', as_attachment=True, download_name='output.txt', conditional=True)
+            response = send_file(tmp_file.name, mimetype='text/plain',
+                                 as_attachment=True, download_name='output.txt', conditional=True)
             response.headers['X-Accel-Buffering'] = 'no'
             response.headers['Cache-Control'] = 'no-cache'
             response.headers['Connection'] = 'close'
-            
+
             @after_this_request
             def remove_file(response):
                 os.remove(tmp_file.name)
                 return response
-            
+
             return response
         else:
             zip_file = pdf_to_text_multiple(files)
-            response = send_file(zip_file.name, mimetype='application/zip', as_attachment=True, download_name='output.zip', conditional=True)
+            response = send_file(zip_file.name, mimetype='application/zip',
+                                 as_attachment=True, download_name='output.zip', conditional=True)
             response.headers['X-Accel-Buffering'] = 'no'
             response.headers['Cache-Control'] = 'no-cache'
             response.headers['Connection'] = 'close'
-            
+
             @after_this_request
             def remove_file(response):
                 os.remove(zip_file.name)
                 return response
-            
+
             return response

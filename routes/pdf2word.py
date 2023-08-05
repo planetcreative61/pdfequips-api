@@ -3,9 +3,8 @@ from utils.utils import validate_file
 from pdf2wordconverter import pdf_to_word_converter, pdf_to_word_converter_multiple
 
 
-
 def pdf_to_word_route(app):
-    @app.route('/pdf-to-word', methods=['POST'])
+    @app.route('/api/pdf-to-word', methods=['POST'])
     def convert_pdf_to_word():
         if 'files' not in request.files:
             return jsonify({"error": "No pdf_file found"}), 400

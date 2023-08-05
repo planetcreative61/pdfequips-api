@@ -6,7 +6,7 @@ from pdf_to_jpg_converter import pdf_to_jpg_converter, pdf_to_jpg_converter_mult
 
 def pdf_to_jpg_route(app):
     # Define the route and function to handle the POST request
-    @app.route('/pdf-to-jpg', methods=['POST'])
+    @app.route('/api/pdf-to-jpg', methods=['POST'])
     def pdf_to_jpg_endpoint():
         if request.method == 'POST':
             # Create the temp directory if it doesn't exist

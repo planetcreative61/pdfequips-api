@@ -3,8 +3,9 @@ from img2pdfconverter import image_to_pdf
 from utils.utils import validate_file
 from flask import make_response
 
+
 def jpg_to_pdf_route(app):
-    @app.route('/jpg-to-pdf', methods=['POST'])
+    @app.route('/api/jpg-to-pdf', methods=['POST'])
     def jpg_to_pdf_handler():
         if 'files' not in request.files:
             return jsonify({"error": "No PDF file provided"}), 400
@@ -19,4 +20,3 @@ def jpg_to_pdf_route(app):
         response = make_response(image_to_pdf(images))
         response.headers.set('Content-Type', 'application/pdf')
         return response
-

@@ -12,7 +12,7 @@ import os
 
 
 def compress_pdf_route(app):
-    @app.route('/compress-pdf', methods=['POST'])
+    @app.route('/api/compress-pdf', methods=['POST'])
     def compress_pdf_handler():
         if 'files' not in request.files:
             return jsonify({"error": "No PDF file provided"}), 400

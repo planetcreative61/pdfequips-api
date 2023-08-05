@@ -3,11 +3,10 @@ from excel2pdf_converter import excel_to_pdf, excel_to_pdf_multiple
 from utils.utils import validate_file
 
 
-
 def excel_to_pdf_route(app):
-    @app.route('/excel-to-pdf', methods=['POST'])
+    @app.route('/api/excel-to-pdf', methods=['POST'])
     def convert_excel_to_pdf():
-        if 'files' not in request.files: # type: ignore
+        if 'files' not in request.files:  # type: ignore
             return jsonify({"error": "No PDF file provided"}), 400
         files = request.files.getlist("files")
         error = validate_file(files)
