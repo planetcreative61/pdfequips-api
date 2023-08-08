@@ -7,14 +7,6 @@ from flask import send_file
 import zipfile
 import shutil
 
-"""
-    i want another function called pdf_to_pptx which takes a pdf file.
-    and it should convert it the same approach i.e soffice.
-    and return for download.
-    i'm then calling the pdf_to_pptx function and passing pdf_files[0] to it which is 
-    files = request.files.getlist('files')z
-"""
-
 
 def pdf_to_word_converter(pdf_file):
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp:
@@ -22,47 +14,49 @@ def pdf_to_word_converter(pdf_file):
         temp.write(pdf_file.read())
         temp_path = temp.name
 
-    output_dir = tempfile.gettempdir()
-    output_file = os.path.join(output_dir, os.path.basename(
-        temp_path).replace(".pdf", ".docx"))
+    # Extract filename without extension from temp file path
+    file_name_without_ext = os.path.splitext(os.path.basename(temp_path))[0]
+    
+    output_dir = '/tmp'
+    output_file = os.path.join(output_dir, f'{file_name_without_ext}.docx')
 
-    # Use soffice for conversion
-    command = f'soffice --infilter="writer_pdf_import" --convert-to docx --outdir "{output_dir}" "{temp_path}"'
+    # Use custom Java program for conversion
+    # Provide absolute path to jar file
+    command = f'java -jar /home/pdfequips/htdocs/pdfequips.com/java_programs/pdf-to-word-converter/target/pdf-to-word-converter-1.0-SNAPSHOT.jar "{temp_path}"'
     subprocess.run(command, shell=True, check=True)
 
-    response = send_file(output_file, as_attachment=True,
-                         mimetype='application/msword')
+    response = send_file(output_file, as_attachment=True, mimetype='application/msword')
     os.remove(output_file)
     os.remove(temp_path)
     return response
 
 
-def pdf_to_word(file_storage: FileStorage):
-    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp:
-        file_storage.save(temp.name)
-        temp_path = temp.name
-
-    output_dir = tempfile.gettempdir()
-    output_file = os.path.join(output_dir, os.path.basename(
-        temp_path).replace(".pdf", ".docx"))
-
-    command = f'soffice --infilter="writer_pdf_import" --convert-to docx --outdir "{output_dir}" "{temp_path}"'
-    subprocess.run(command, shell=True, check=True)
-
-    os.remove(temp_path)  # Delete the temporary PDF file
-    return output_file
 
 
-"""
-    please update this funciton, and make it change the stored word file names to be the same as
-    the original uploaded pdf files.
-    not just random names generated.
-"""
 
+
+
+# this function is working fine, however the generated files should be named the same names as the orinal filenames not just random names, i mean the original uploaded file names.
+# also the pdf files should be removed along with the word files after adding the word files to the zip folder
 
 def pdf_to_word_converter_multiple(pdf_files):
-    # Convert PDF files to Word files
-    word_files = [pdf_to_word(pdf_file) for pdf_file in pdf_files]
+    word_files = []
+    for pdf_file in pdf_files:
+        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp:
+            pdf_file.seek(0)
+            temp.write(pdf_file.read())
+            temp_path = temp.name
+
+        # Extract filename without extension from temp file path
+        file_name_without_ext = os.path.splitext(os.path.basename(temp_path))[0]
+        output_dir = '/tmp'
+        output_file = os.path.join(output_dir, f'{file_name_without_ext}.docx')
+
+        # Use custom Java program for conversion
+        command = f'java -jar /home/pdfequips/htdocs/pdfequips.com/java_programs/pdf-to-word-converter/target/pdf-to-word-converter-1.0-SNAPSHOT.jar "{temp_path}"'
+        subprocess.run(command, shell=True, check=True)
+
+        word_files.append(output_file)
 
     # Create a zip file in memory
     zip_buffer = io.BytesIO()
@@ -71,6 +65,7 @@ def pdf_to_word_converter_multiple(pdf_files):
             zipf.write(word_file, os.path.basename(word_file))
             # Delete the Word file after adding it to the zip
             os.remove(word_file)
+            os.remove(temp_path)
 
     # Set the buffer's position to the beginning of the file
     zip_buffer.seek(0)
