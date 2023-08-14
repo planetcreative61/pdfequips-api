@@ -6,3 +6,4 @@ pandas
 pdf2docx
 Werkzeug
 openpyxl
+python-pptx

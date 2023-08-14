@@ -3,10 +3,9 @@ from werkzeug.datastructures import FileStorage
 import os
 import tempfile
 import subprocess
-from flask import send_file
+from flask import send_file, after_this_request
 import zipfile
 import shutil
-
 
 def pdf_to_word_converter(pdf_file):
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp:
@@ -22,53 +21,55 @@ def pdf_to_word_converter(pdf_file):
 
     # Use custom Java program for conversion
     # Provide absolute path to jar file
-    command = f'java -jar /home/pdfequips/htdocs/pdfequips.com/java_programs/pdf-to-word-converter/target/pdf-to-word-converter-1.0-SNAPSHOT.jar "{temp_path}"'
+    command = f'java -jar /var/www/pdfequips/html/java_programs/pdf-to-word-converter/target/pdf-to-word-converter-1.0-SNAPSHOT.jar "{temp_path}"'
     subprocess.run(command, shell=True, check=True)
 
     response = send_file(output_file, as_attachment=True, mimetype='application/msword')
     os.remove(output_file)
-    os.remove(temp_path)
+    os.remove(temp)
     return response
 
 
 
 
-
-
-
-# this function is working fine, however the generated files should be named the same names as the orinal filenames not just random names, i mean the original uploaded file names.
-# also the pdf files should be removed along with the word files after adding the word files to the zip folder
-
 def pdf_to_word_converter_multiple(pdf_files):
-    word_files = []
-    for pdf_file in pdf_files:
-        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp:
-            pdf_file.seek(0)
-            temp.write(pdf_file.read())
-            temp_path = temp.name
+    # Create a temporary directory to store the converted files
+    temp_dir = tempfile.mkdtemp()
 
-        # Extract filename without extension from temp file path
-        file_name_without_ext = os.path.splitext(os.path.basename(temp_path))[0]
+    # Convert each PDF file to Word format
+    converted_files = []
+    for pdf_file in pdf_files:
+        # Save the PDF file with the original name to the temporary directory
+        temp_pdf_path = os.path.join(temp_dir, pdf_file.filename)
+        pdf_file.save(temp_pdf_path)
+
+        # Extract the filename without extension
+        file_name_without_ext = os.path.splitext(os.path.basename(temp_pdf_path))[0]
+
+        # Convert the PDF file to Word using the Java program
         output_dir = '/tmp'
         output_file = os.path.join(output_dir, f'{file_name_without_ext}.docx')
-
-        # Use custom Java program for conversion
-        command = f'java -jar /home/pdfequips/htdocs/pdfequips.com/java_programs/pdf-to-word-converter/target/pdf-to-word-converter-1.0-SNAPSHOT.jar "{temp_path}"'
+        command = f'java -jar /var/www/pdfequips/html/java_programs/pdf-to-word-converter/target/pdf-to-word-converter-1.0-SNAPSHOT.jar "{temp_pdf_path}"'
         subprocess.run(command, shell=True, check=True)
 
-        word_files.append(output_file)
+        # Move the converted Word file to the temporary directory
+        temp_word_path = os.path.join(temp_dir, f'{file_name_without_ext}.docx')
+        shutil.move(output_file, temp_word_path)
 
-    # Create a zip file in memory
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zipf:
-        for word_file in word_files:
-            zipf.write(word_file, os.path.basename(word_file))
-            # Delete the Word file after adding it to the zip
-            os.remove(word_file)
-            os.remove(temp_path)
+        # Store the path of the converted Word file
+        converted_files.append(temp_word_path)
 
-    # Set the buffer's position to the beginning of the file
-    zip_buffer.seek(0)
+    # Create a zip file containing the converted Word files
+    zip_path = os.path.join(temp_dir, 'converted_files.zip')
+    with zipfile.ZipFile(zip_path, 'w') as zip_file:
+        for word_file in converted_files:
+            zip_file.write(word_file, os.path.basename(word_file))
 
-    # Return the zip file
-    return send_file(zip_buffer, as_attachment=True, download_name="converted_files.zip", mimetype="application/zip")
+    @after_this_request
+    def cleanup(response):
+        # Clean up temporary files and directory
+        shutil.rmtree(temp_dir)
+        return response
+
+    # Return the zip file to the client
+    return send_file(zip_path, as_attachment=True, mimetype='application/zip')
