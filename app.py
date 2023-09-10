@@ -1,6 +1,6 @@
 # Making sure we have the necessary imports:
 # pip install opencv-python-headless
-# from flask_cors import CORS
+from flask_cors import CORS
 from flask import Flask
 
 
@@ -13,6 +13,7 @@ from routes.html2pdf import html_to_pdf_route
 # from . import img2pdf
 
 from routes.img_2pdf import jpg_to_pdf_route
+from routes.lock_pdf import lock_pdf_route
 from routes.mergepdfs import merge_pdfs_route
 from routes.pdf2excel import pdf_to_excel_route
 from routes.pdf2img import pdf_to_jpg_route
@@ -38,7 +39,7 @@ logging.basicConfig(filename='app.log', level=logging.DEBUG)
 app = Flask(__name__)
 
 # cors
-# CORS(app)
+cors = CORS(app, resources={r"/*": {"origins": ["http://149.100.159.150:3000"]}})
 
 
 # setting templates directory for get routes
@@ -62,7 +63,10 @@ compress_pdf_route(app)
 pdf_to_text_route(app)
 # other pdf tool routes
 merge_pdfs_route(app)
+lock_pdf_route(app)
+
+
 if __name__ == "__main__":
-    # app.run(debug=True)
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', debug=True, port=5000, use_reloader=True)
+    # app.run(host='0.0.0.0', port=5000, debug=True)
 
