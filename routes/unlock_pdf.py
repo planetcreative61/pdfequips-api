@@ -1,13 +1,15 @@
 import os
 from tempfile import NamedTemporaryFile
 from flask import after_this_request, jsonify, request, send_file
-from tools.lock_pdf import lock_multiple_pdf_files, lock_pdf_file
+from tools.unlock_pdf import unlock_multiple_pdf_files, unlock_pdf_file
+
+
 from utils.utils import validate_file
 
 
-def lock_pdf_route(app):
-    @app.route('/api/lock-pdf', methods=['POST'])
-    def lock_pdf():
+def unlock_pdf_route(app):
+    @app.route('/api/unlock-pdf', methods=['POST'])
+    def unlock_pdf():
         if 'files' not in request.files:
             return jsonify({"error": "No PDF file provided"}), 400
         files = request.files.getlist('files')
@@ -17,16 +19,17 @@ def lock_pdf_route(app):
             response.headers['Content-Type'] = 'application/json'
             return jsonify({"error": response}), 400
         files = request.files.getlist("files")
-        password = request.form.get('password')
+        passwords = request.form.getlist('passwords')
         if len(files) == 1:
             file = files[0]
-            locked_file = lock_pdf_file(file, password)
+            # Replace with your unlocking logic
+            unlocked_file = unlock_pdf_file(file, passwords[0])
             with NamedTemporaryFile(mode='wb', delete=False) as tmp_file:
-                tmp_file.write(locked_file)
+                tmp_file.write(unlocked_file)
                 tmp_file.flush()
                 os.fsync(tmp_file.fileno())
             response = send_file(tmp_file.name, mimetype='application/pdf',
-                                 as_attachment=True, download_name='locked.pdf', conditional=True)
+                                 as_attachment=True, download_name='unlocked.pdf', conditional=True)
             response.headers['X-Accel-Buffering'] = 'no'
             response.headers['Cache-Control'] = 'no-cache'
             response.headers['Connection'] = 'close'
@@ -38,10 +41,10 @@ def lock_pdf_route(app):
 
             return response
         else:
-            # then i want to use it on my flask app like this:
-            zip_file_path = lock_multiple_pdf_files(files, password)
+            # Replace with your unlocking logic for multiple files
+            zip_file_path = unlock_multiple_pdf_files(files, passwords)
             response = send_file(zip_file_path, mimetype='application/zip',
-                                 as_attachment=True, download_name='locked_files.zip')
+                                 as_attachment=True, download_name='unlocked_files.zip')
 
             @after_this_request
             def remove_file(response):

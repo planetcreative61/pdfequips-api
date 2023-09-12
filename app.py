@@ -21,6 +21,7 @@ from routes.pdf2pdf_A import pdf_to_pdfa_route
 from routes.pdf2ppt import pdf_to_ppt_route
 from routes.pdf2word import pdf_to_word_route
 from routes.ppt2pdf import ppt_to_pdf_route
+from routes.unlock_pdf import unlock_pdf_route
 from routes.word2pdf import word_to_pdf_route
 from routes.pdf2text import pdf_to_text_route
 # from .utils import is_pdf, upload_file
@@ -39,7 +40,8 @@ logging.basicConfig(filename='app.log', level=logging.DEBUG)
 app = Flask(__name__)
 
 # cors
-cors = CORS(app, resources={r"/*": {"origins": ["http://149.100.159.150:3000"]}})
+cors = CORS(app, resources={
+            r"/*": {"origins": ["http://149.100.159.150:3000"]}})
 
 
 # setting templates directory for get routes
@@ -64,9 +66,9 @@ pdf_to_text_route(app)
 # other pdf tool routes
 merge_pdfs_route(app)
 lock_pdf_route(app)
+unlock_pdf_route(app)
 
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True, port=5000, use_reloader=True)
     # app.run(host='0.0.0.0', port=5000, debug=True)
-
