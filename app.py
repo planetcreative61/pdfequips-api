@@ -3,15 +3,9 @@
 from flask_cors import CORS
 from flask import Flask
 
-
-from jinja2 import FileSystemLoader
-from werkzeug.middleware.proxy_fix import ProxyFix
-
 from routes.compresspdf_route import compress_pdf_route
 from routes.excel2pdf import excel_to_pdf_route
 from routes.html2pdf import html_to_pdf_route
-# from . import img2pdf
-
 from routes.img_2pdf import jpg_to_pdf_route
 from routes.lock_pdf import lock_pdf_route
 from routes.mergepdfs import merge_pdfs_route
@@ -21,6 +15,7 @@ from routes.pdf2pdf_A import pdf_to_pdfa_route
 from routes.pdf2ppt import pdf_to_ppt_route
 from routes.pdf2word import pdf_to_word_route
 from routes.ppt2pdf import ppt_to_pdf_route
+from routes.rotate_pdf import rotate_pdf_route
 from routes.unlock_pdf import unlock_pdf_route
 from routes.word2pdf import word_to_pdf_route
 from routes.pdf2text import pdf_to_text_route
@@ -30,7 +25,6 @@ from routes.pdf2text import pdf_to_text_route
 # from werkzeug.utils import secure_filename
 
 # from flask import abort
-from PIL import Image
 
 # only for DEVELOPMENT
 import logging
@@ -67,6 +61,7 @@ pdf_to_text_route(app)
 merge_pdfs_route(app)
 lock_pdf_route(app)
 unlock_pdf_route(app)
+rotate_pdf_route(app)
 
 
 if __name__ == "__main__":
