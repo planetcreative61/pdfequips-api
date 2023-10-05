@@ -19,6 +19,7 @@ from routes.rotate_pdf import rotate_pdf_route
 from routes.unlock_pdf import unlock_pdf_route
 from routes.word2pdf import word_to_pdf_route
 from routes.pdf2text import pdf_to_text_route
+from routes.split_pdf import split_pdf_route
 # from .utils import is_pdf, upload_file
 
 # from compress_pdf import compress_pdf
@@ -34,8 +35,10 @@ logging.basicConfig(filename='app.log', level=logging.DEBUG)
 app = Flask(__name__)
 
 # cors
-cors = CORS(app, resources={
-            r"/*": {"origins": ["http://149.100.159.150:3000"]}})
+# cors = CORS(app, resources={
+#             r"/*": {"origins": ["http://149.100.159.150:3000"]}})
+
+cors = CORS(app)
 
 
 # setting templates directory for get routes
@@ -62,6 +65,7 @@ merge_pdfs_route(app)
 lock_pdf_route(app)
 unlock_pdf_route(app)
 rotate_pdf_route(app)
+split_pdf_route(app)
 
 
 if __name__ == "__main__":
