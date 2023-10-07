@@ -29,43 +29,43 @@ def split_pdf_route(app):
             response.headers['Content-Type'] = 'application/json'
             return jsonify({"error": response}), 400
         if len(files) == 1:
-            # file = files[0]
             file = files[0]
-            split_file_path = split_by_range(file, ranges)
+            split_file_path, output_files = split_by_range(file, ranges)
             if not split_file_path:
                 return jsonify({"error": "Error splitting PDF"}), 500
-            if split_file_path.endswith('.pdf'):
-                mimetype = 'application/pdf'
-                download_name = 'split.pdf'
-            else:  # It's a zip file
-                mimetype = 'application/zip'
-                download_name = 'split.zip'
-            response = send_file(split_file_path, mimetype=mimetype,
-                                 as_attachment=True, download_name=download_name, conditional=True)
-            response.headers['X-Accel-Buffering'] = 'no'
-            response.headers['Cache-Control'] = 'no-cache'
-            response.headers['Connection'] = 'close'
+            try:
+                if split_file_path.endswith('.pdf'):
+                    mimetype = 'application/pdf'
+                    download_name = 'split.pdf'
+                else:  # It's a zip file
+                    mimetype = 'application/zip'
+                    download_name = 'split.zip'
+                response = send_file(split_file_path, mimetype=mimetype,
+                                    as_attachment=True, download_name=download_name, conditional=True)
+                response.headers['X-Accel-Buffering'] = 'no'
+                response.headers['Cache-Control'] = 'no-cache'
+                response.headers['Connection'] = 'close'
 
-            @after_this_request
-            def remove_file(response):
+            finally:
                 os.remove(split_file_path)
-                return response
-
+                for file_path in output_files:
+                    os.remove(file_path)
             return response
         else:
-            zip_file_path = split_by_range(files, ranges)
-            if not zip_file_path:
-                return jsonify({"error": "Error splitting PDF"}), 500
-            response = send_file(zip_file_path, mimetype='application/zip',
-                                 as_attachment=True, download_name='split.zip', conditional=True)
-            response.headers['X-Accel-Buffering'] = 'no'
-            response.headers['Cache-Control'] = 'no-cache'
-            response.headers['Connection'] = 'close'
-
-            @after_this_request
-            def remove_file(response):
+            try:
+                zip_file_path, output_files = split_by_range(files, ranges)
+                if not zip_file_path:
+                    return jsonify({"error": "Error splitting PDF"}), 500
+                response = send_file(zip_file_path, mimetype='application/zip',
+                                    as_attachment=True, download_name='split.zip', conditional=True)
+                response.headers['X-Accel-Buffering'] = 'no'
+                response.headers['Cache-Control'] = 'no-cache'
+                response.headers['Connection'] = 'close'
+            finally:
                 os.remove(zip_file_path)
+                for file_path in output_files:
+                    os.remove(file_path)
+                # os.remove(temp_file.name)
                 return response
-
             return response
 
