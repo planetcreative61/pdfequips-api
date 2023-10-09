@@ -1,3 +1,9 @@
+"""
+    please give me another function for page extraction like the function below, the only difference is that it's not taking ranges but instead it's taking selected_pages
+    which is in the format: /^(\d+(?:-\d+)?,)*(\d+(?:-\d+)?)$/ or the string "all"
+    if it's equal to all that means that each page should be extracted into a new pdf file
+    otherwise it does the operation based on the selected_pages format.
+"""
 from PyPDF2 import PdfReader, PdfWriter
 import os
 from tempfile import NamedTemporaryFile

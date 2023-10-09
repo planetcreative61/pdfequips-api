@@ -1,10 +1,9 @@
-# Making sure we have the necessary imports:
-# pip install opencv-python-headless
 from flask_cors import CORS
 from flask import Flask
 
 from routes.compresspdf_route import compress_pdf_route
 from routes.excel2pdf import excel_to_pdf_route
+from routes.extract_pages import extract_pages_route
 from routes.html2pdf import html_to_pdf_route
 from routes.img_2pdf import jpg_to_pdf_route
 from routes.lock_pdf import lock_pdf_route
@@ -19,7 +18,7 @@ from routes.rotate_pdf import rotate_pdf_route
 from routes.unlock_pdf import unlock_pdf_route
 from routes.word2pdf import word_to_pdf_route
 from routes.pdf2text import pdf_to_text_route
-from routes.split_pdf import split_pdf_route
+from routes.split_by_range import split_by_range_route
 # from .utils import is_pdf, upload_file
 
 # from compress_pdf import compress_pdf
@@ -65,7 +64,8 @@ merge_pdfs_route(app)
 lock_pdf_route(app)
 unlock_pdf_route(app)
 rotate_pdf_route(app)
-split_pdf_route(app)
+split_by_range_route(app)
+extract_pages_route(app)
 
 
 if __name__ == "__main__":
