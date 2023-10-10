@@ -1,4 +1,4 @@
-from flask_cors import CORS
+# from flask_cors import CORS
 from flask import Flask
 
 from routes.compresspdf_route import compress_pdf_route
@@ -37,7 +37,7 @@ app = Flask(__name__)
 # cors = CORS(app, resources={
 #             r"/*": {"origins": ["http://149.100.159.150:3000"]}})
 
-cors = CORS(app)
+# cors = CORS(app)
 
 
 # setting templates directory for get routes

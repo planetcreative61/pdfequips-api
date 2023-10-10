@@ -45,3 +45,19 @@ def extract_pages_route(app):
                 for file_path in output_files:
                     os.remove(file_path)
             return response
+        else:
+            try:
+                zip_file_path, output_files = extract_pages(
+                    file, selected_pages, merge)
+                if not zip_file_path:
+                    return jsonify({"error": "Error splitting PDF"}), 500
+                response = send_file(zip_file_path, mimetype='application/zip',
+                                     as_attachment=True, download_name='split.zip', conditional=True)
+                response.headers['X-Accel-Buffering'] = 'no'
+                response.headers['Cache-Control'] = 'no-cache'
+                response.headers['Connection'] = 'close'
+            finally:
+                os.remove(zip_file_path)
+                for file_path in output_files:
+                    os.remove(file_path)
+            return response
