@@ -17,6 +17,7 @@ tmp/
 
 # Dependency directories
 venv/
+.venv/
 env/
 
 # IDE files

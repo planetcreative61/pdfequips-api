@@ -8,7 +8,7 @@ from routes.html2pdf import html_to_pdf_route
 from routes.img_2pdf import jpg_to_pdf_route
 from routes.lock_pdf import lock_pdf_route
 from routes.mergepdfs import merge_pdfs_route
-from routes.pdf2excel import pdf_to_excel_route
+# from routes.pdf2excel import pdf_to_excel_route
 from routes.pdf2img import pdf_to_jpg_route
 from routes.pdf2pdf_A import pdf_to_pdfa_route
 from routes.pdf2ppt import pdf_to_ppt_route
@@ -19,6 +19,7 @@ from routes.unlock_pdf import unlock_pdf_route
 from routes.word2pdf import word_to_pdf_route
 from routes.pdf2text import pdf_to_text_route
 from routes.split_by_range import split_by_range_route
+from routes.translate_pdf import translate_pdf_route
 # from .utils import is_pdf, upload_file
 
 # from compress_pdf import compress_pdf
@@ -55,7 +56,7 @@ ppt_to_pdf_route(app)
 html_to_pdf_route(app)
 pdf_to_pdfa_route(app)
 excel_to_pdf_route(app)
-pdf_to_excel_route(app)
+# pdf_to_excel_route(app)
 pdf_to_ppt_route(app)
 compress_pdf_route(app)
 pdf_to_text_route(app)
@@ -66,7 +67,7 @@ unlock_pdf_route(app)
 rotate_pdf_route(app)
 split_by_range_route(app)
 extract_pages_route(app)
-
+translate_pdf_route(app)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True, port=5000, use_reloader=True)

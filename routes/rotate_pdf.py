@@ -5,7 +5,10 @@ from tools.rotate_pdf import rotate_pdf, rotate_pdf_multiple
 from utils.utils import validate_file
 import json
 
-
+"""
+    i want another route function like the below but for /api/translate-pdf
+    which is the same but accepts a from_language and to_language from the front end and passes it to translate_pdf & translate_pdf_multiple
+"""
 def rotate_pdf_route(app):
     @app.route('/api/rotate-pdf', methods=['POST'])
     def rotate_pdf_file():
