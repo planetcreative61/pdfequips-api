@@ -49,12 +49,12 @@
 
 
 import tempfile
-from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib.colors import HexColor
-
+import os
 def number_pdf(file, options):
     # Store the file in a temporary folder before processing
     temp_folder = tempfile.mkdtemp()
@@ -78,11 +78,11 @@ def number_pdf(file, options):
 
     # Open the PDF file
     with open(temp_file_path, 'rb') as pdf_file:
-        pdf_reader = PdfFileReader(pdf_file)
-        total_pages = pdf_reader.numPages
+        pdf_reader = PdfReader(pdf_file)
+        total_pages = len(pdf_reader.pages)
 
         # Create a new PDF writer
-        pdf_writer = PdfFileWriter()
+        pdf_writer = PdfWriter()
 
         # Iterate over each page in the PDF file
         for page_number in range(total_pages):
@@ -133,7 +133,7 @@ def number_pdf(file, options):
             packet.seek(0)
 
             # Merge the canvas with the original page
-            overlay = PdfFileReader(packet)
+            overlay = PdfReader(packet)
             page = pdf_reader.getPage(page_number)
             page.mergePage(overlay.getPage(0))
 

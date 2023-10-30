@@ -1,7 +1,7 @@
 import os
 import shutil
 from flask import request, jsonify, send_file, after_this_request
-from tools.number_pdf import number
+from tools.number_pdf import number_pdf
 from utils.utils import validate_file
 import json
 def number_pdf_route(app):
