@@ -36,10 +36,10 @@ logging.basicConfig(filename='app.log', level=logging.DEBUG)
 app = Flask(__name__)
 
 # cors
-cors = CORS(app, resources={
-            r"/*": {"origins": ["http://149.100.159.150:3000", "https://3000-sanusihassan-numberpdf-er0s3tot2bv.ws-eu105.gitpod.io/"]}})
+# cors = CORS(app, resources={
+#             r"/*": {"origins": ["http://149.100.159.150:3000", "https://3000-sanusihassan-numberpdf-er0s3tot2bv.ws-eu105.gitpod.io/"]}})
 
-# cors = CORS(app)
+cors = CORS(app)
 
 
 # setting templates directory for get routes

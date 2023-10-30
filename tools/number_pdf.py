@@ -55,6 +55,59 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib.colors import HexColor
 import os
+"""
+    Traceback (most recent call last):
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/reportlab/pdfbase/pdfmetrics.py", line 697, in getFont
+    return _fonts[fontName]
+           ^^^^^^^^^^^^^^^^
+KeyError: 'arial'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/flask/app.py", line 1478, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/flask/app.py", line 1458, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/flask/app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/flask/app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/pdfequips-api/routes/number_pdf.py", line 25, in number_pdf_file
+    result = number_pdf(files[0], options)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/pdfequips-api/tools/number_pdf.py", line 94, in number_pdf
+    can.setFont(font, font_size)
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/reportlab/pdfgen/canvas.py", line 1726, in setFont
+    font = pdfmetrics.getFont(self._fontname)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/reportlab/pdfbase/pdfmetrics.py", line 699, in getFont
+    return findFontAndRegister(fontName)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/reportlab/pdfbase/pdfmetrics.py", line 681, in findFontAndRegister
+    face = getTypeFace(fontName)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.pyenv_mirror/user/current/lib/python3.12/site-packages/reportlab/pdfbase/pdfmetrics.py", line 638, in getTypeFace
+    return _typefaces[faceName]
+           ^^^^^^^^^^^^^^^^^^^^
+KeyError: 'arial'
+"""
 def number_pdf(file, options):
     # Store the file in a temporary folder before processing
     temp_folder = tempfile.mkdtemp()
@@ -91,13 +144,13 @@ def number_pdf(file, options):
             can = canvas.Canvas(packet, pagesize=letter)
 
             # Set the font properties
-            can.setFont(font, font_size)
-            if is_bold:
-                can.setFont(font, font_size, 'bold')
-            if is_italic:
-                can.setFont(font, font_size, 'italic')
-            if is_underlined:
-                can.setFont(font, font_size, 'underline')
+            # can.setFont(font, font_size)
+            # if is_bold:
+            #     can.setFont(font, font_size, 'bold')
+            # if is_italic:
+            #     can.setFont(font, font_size, 'italic')
+            # if is_underlined:
+            #     can.setFont(font, font_size, 'underline')
 
             # Set the color
             can.setFillColor(HexColor(color))
@@ -134,11 +187,11 @@ def number_pdf(file, options):
 
             # Merge the canvas with the original page
             overlay = PdfReader(packet)
-            page = pdf_reader.getPage(page_number)
-            page.mergePage(overlay.getPage(0))
+            page = pdf_reader.pages[page_number]
+            page.merge_page(overlay.pages[0])
 
             # Add the modified page to the PDF writer
-            pdf_writer.addPage(page)
+            pdf_writer.add_page(page)
 
     # Save the processed PDF to a new file
     processed_file_path = os.path.join(temp_folder, 'numbered.pdf')
