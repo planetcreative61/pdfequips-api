@@ -1,9 +1,12 @@
 Flask
 PyPDF2
 Pillow
-tabula-py
+# tabula-py
 pandas
 pdf2docx
 Werkzeug
 openpyxl
 python-pptx
+pdf2image
+pikepdf
+reportlab

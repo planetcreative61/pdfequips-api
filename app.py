@@ -20,6 +20,7 @@ from routes.word2pdf import word_to_pdf_route
 from routes.pdf2text import pdf_to_text_route
 from routes.split_by_range import split_by_range_route
 from routes.number_pdf import number_pdf_route
+from routes.get_md_files import get_md_files
 # from routes.translate_pdf import translate_pdf_route
 # from .utils import is_pdf, upload_file
 
@@ -70,7 +71,7 @@ split_by_range_route(app)
 extract_pages_route(app)
 # translate_pdf_route(app)
 number_pdf_route(app)
-
+get_md_files(app)
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True, port=5000, use_reloader=True)
     # app.run(host='0.0.0.0', port=5000, debug=True)
