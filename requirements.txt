@@ -1,7 +1,8 @@
+libretranslate
 Flask
 PyPDF2
 Pillow
-# tabula-py
+tabula-py
 pandas
 pdf2docx
 Werkzeug
@@ -10,3 +11,5 @@ python-pptx
 pdf2image
 pikepdf
 reportlab
+flask_cors
+requests
