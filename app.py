@@ -7,7 +7,7 @@ from routes.extract_pages import extract_pages_route
 from routes.html2pdf import html_to_pdf_route
 from routes.img_2pdf import jpg_to_pdf_route
 from routes.lock_pdf import lock_pdf_route
-from routes.md_to_pdf import markdown_to_pdf_route
+from routes.md_to_pdf import md_text_to_pdf_route
 from routes.mergepdfs import merge_pdfs_route
 from routes.pdf2excel import pdf_to_excel_route
 from routes.pdf2img import pdf_to_jpg_route
@@ -65,7 +65,8 @@ extract_pages_route(app)
 # translate_pdf_route(app)
 number_pdf_route(app)
 get_md_files(app)
-markdown_to_pdf_route(app)
+# markdown_to_pdf_route(app)
+md_text_to_pdf_route(app)
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True, port=5000, use_reloader=True)
     # app.run(host='0.0.0.0', port=5000, debug=True)

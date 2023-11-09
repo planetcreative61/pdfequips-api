@@ -1,47 +1,33 @@
 import os
 import shutil
 from flask import jsonify, request, send_file, after_this_request
-from tools.markdown_to_pdf import markdown_to_pdf, markdown_to_pdf_multiple
+from tools.markdown_to_pdf import md_text_to_pdf
 from utils.utils import validate_file
 import json
 
-def markdown_to_pdf_route(app):
-    @app.route('/api/markdown-to-pdf', methods=['POST'])
-    def markdown_to_pdf_file():
-        print("accessed")
-        if 'files' not in request.files:
-            return jsonify({"error": "No markdown file provided"}), 400
-        files = request.files.getlist('files')
-        error = validate_file(files)
-        if error:
-            response = jsonify(error)
-            response.headers['Content-Type'] = 'application/json'
-            return jsonify({"error": response}), 400
-        if len(files) == 1:
-            converted_file = markdown_to_pdf(files[0])
-            response = send_file(converted_file, mimetype='application/pdf',
-                                 as_attachment=True, download_name='converted.pdf', conditional=True)
-
-            @after_this_request
-            def remove_file(response):
-                os.remove(converted_file)
-                return response
-            response.headers['X-Accel-Buffering'] = 'no'
-            response.headers['Cache-Control'] = 'no-cache'
-            response.headers['Connection'] = 'close'
+def md_text_to_pdf_route(app):
+    @app.route("/api/md-text-to-pdf", methods=['POST'])
+    def md_text_to_pdf_handler():
+        md = json.loads(request.form.get('markdown'))
+        md_file, pdf_path = md_text_to_pdf(md['markdown'])
+        @after_this_request
+        def remove_file(response):
+            try:
+                os.remove(pdf_path)
+                os.remove(md_file)
+            except Exception as error:
+                app.logger.error("Error removing or closing downloaded file handle", error)
             return response
-        # else:
-        #     zip_file, temp_directory = markdown_to_pdf_multiple(files=files)
-        #     response = send_file(zip_file, mimetype='application/zip',
-        #                          as_attachment=True, download_name='output.zip', conditional=True)
-        #     response.headers['X-Accel-Buffering'] = 'no'
-        #     response.headers['Cache-Control'] = 'no-cache'
-        #     response.headers['Connection'] = 'close'
 
-        #     @after_this_request
-        #     def remove_file(response):
-        #         os.remove(zip_file)
-        #         shutil.rmtree(temp_directory)
-        #         return response
+        return send_file(pdf_path, as_attachment=True, download_name="output.pdf")
 
-        #     return response
+def md_to_pdf_route(app):
+    @app.route("/api/md-to-pdf", methods=['POST'])
+    def md_to_pdf_handler():
+        if 'files' not in request.files:
+            return jsonify({"error": "No PDF file provided"}), 400
+        files = request.files.getlist('files')
+        if len(files) == 1:
+            pdf_path = md_to_pdf(files[0])
+            pass
+        pass
