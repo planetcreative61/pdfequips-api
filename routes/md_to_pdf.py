@@ -49,7 +49,7 @@ def md_to_pdf_route(app):
                 shutil.rmtree(tmp_path)
             return response
 
-        if tmp_path.endswith('.md'):
-            return send_file(pdf_path, as_attachment=True)
-        else:
-            return send_file(pdf_path, as_attachment=True, download_name='output.zip')
+        # if tmp_path.endswith('.md'):
+        # else:
+        return send_file(pdf_path, as_attachment=True)
+            # return send_file(pdf_path, as_attachment=True, download_name='output.zip')

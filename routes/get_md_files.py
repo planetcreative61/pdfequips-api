@@ -3,10 +3,6 @@ import requests
 import os
 
 
-"""
-    please change the implementation of this function where it also includes the url of the file in the response
-    i.e add a url entity to the markdown_files which is the url of the current md file
-"""
 def get_md_files(app):
     @app.route('/api/get-md-files', methods=['GET'])
     def get_md_files_handler():
@@ -30,7 +26,7 @@ def get_md_files(app):
                     {
                         "name": file['name'],
                         "size": file['size'],
-                        "url": file['html_url']
+                        "url": file['download_url']  # Use 'download_url' instead of 'html_url'
                     }
                     for file in data if file['type'] == 'file' and file['name'].endswith('.md')
                 ]
@@ -40,7 +36,7 @@ def get_md_files(app):
                         {
                             "name": data['name'],
                             "size": data['size'],
-                            "url": data['html_url']
+                            "url": data['download_url']  # Use 'download_url' instead of 'html_url'
                         }
                     ]
                 else:
