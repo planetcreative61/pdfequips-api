@@ -624,15 +624,35 @@
 
 
 """
-  i want a function that is called number_pdf and let's do this one by one.
-  the function takes one parameter file which is a flask file object.
-  this file object should be first stored as a tmp file before processing.
-  the function should then add page numbers to each page of the pdf file.
+  thank you very much the function is working well as expected but there is a small problem which is that the color is not set properly
+  the color that is sent with the options parameter is a hex code that looks like this: #7d1818ff i.e 8 digit hex code that represents RRGGBBAA
+  but the function is always setting a blue color for the numbers instead.
+  the options parameter also contain a font property:
+  font: string representing font family, example: "Arial".
+  the font property might be one of these: 
+  [
+arial,
+calibri,
+comic-sans-ms,
+courier-new,
+georgia,
+helvetica,
+impact,
+lucida-console,
+tahoma,
+times-new-roman,
+trebuchet-ms,
+verdan,
+    ];
 """
 import os
 import tempfile
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
+from reportlab.lib.colors import black
+from reportlab.lib.colors import Color
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 def number_pdf(file, options):
     # Step 1: Store the file as a temporary file
@@ -644,12 +664,58 @@ def number_pdf(file, options):
     output_pdf = PdfWriter()
     input_pdf = PdfReader(temp_file)
 
+    # Define margin and font size
+    margin_map = {'small': 10, 'recommended': 20, 'big': 30}
+    margin = margin_map.get(options.get('margin', 'recommended'))
+    font_size = options.get('fontSize', 12)
+    is_bold = options.get('isBold', False)
+    is_italic = options.get('isItalic', False)
+    is_underlined = options.get('isUnderlined', False)
+    color = options.get('color', '#000000')
+    font = options.get('font', 'Helvetica')
+
+    # Convert hex color to RGB
+    color = Color(*[int(color[i:i+2], 16)/255 for i in (1, 3, 5, 7)])
+
+    # Map font names
+    font_map = {
+        'arial': 'Helvetica',
+        'courier-new': 'Courier',
+        'helvetica': 'Helvetica',
+        'times-new-roman': 'Times-Roman'
+    }
+    font = font_map.get(font.lower(), 'Helvetica')
+
+    # Set font style
+    if is_bold and is_italic:
+        font += "-BoldOblique"
+    elif is_bold:
+        font += "-Bold"
+    elif is_italic:
+        font += "-Oblique"
+
     for i, page in enumerate(input_pdf.pages):
         packet = tempfile.NamedTemporaryFile(delete=False)
 
         # Create a new PDF canvas with the page number
         can = canvas.Canvas(packet)
-        can.drawString(10, 10, f'{i + 1}')
+        can.setFontSize(font_size)
+        can.setFillColor(color)
+        can.setFont(font, font_size)
+
+        # Determine the position of the page number
+        bulletPosition = options.get('bulletPosition', 'bottom center').split()
+        y = margin if bulletPosition[0] == 'bottom' else page.mediabox[3] - margin
+        x = margin if bulletPosition[1] == 'left' else page.mediabox[2] - margin if bulletPosition[1] == 'right' else page.mediabox[2] / 2
+
+        # Draw the page number
+        page_number = f'{i + 1}'
+        can.drawString(x, y, page_number)
+
+        # Draw underline if needed
+        if is_underlined:
+            can.line(x, y, x + can.stringWidth(page_number, font, font_size), y)
+
         can.save()
 
         # Move to the beginning of the StringIO buffer
