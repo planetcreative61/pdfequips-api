@@ -624,26 +624,22 @@
 
 
 """
-  thank you very much the function is working well as expected but there is a small problem which is that the color is not set properly
-  the color that is sent with the options parameter is a hex code that looks like this: #7d1818ff i.e 8 digit hex code that represents RRGGBBAA
-  but the function is always setting a blue color for the numbers instead.
-  the options parameter also contain a font property:
-  font: string representing font family, example: "Arial".
-  the font property might be one of these: 
-  [
-arial,
-calibri,
-comic-sans-ms,
-courier-new,
-georgia,
-helvetica,
-impact,
-lucida-console,
-tahoma,
-times-new-roman,
-trebuchet-ms,
-verdan,
-    ];
+  the number_pdf function is working fine, but the options parameter might have a text property.
+  text: string representing string to insert for page number for example page 1, page 2, possible values:
+  'insert only page number (recommended)',
+  'page {n}' as in <page 1>,
+  'page {n} of {x}' as in <page 1 of 5>,
+  'Custom' <any>,
+  if(text === 'insert only page number (recommended)') {
+    insert only page number instead and don't add any additional text
+  } else if(text === 'page {n}') {
+    insert 'page {n}', and replace {n} with the page number
+  } else if(text === 'page {n} of {x}') {
+    n represents page number and x or total represents the total page count.
+  } else {
+    i.e if they inserted custom text: insert the custom text but {n} represents current page number and {x} or {total} represents the total pageCount.
+    also the text in the {} might be any letter other than n or x if so like for example: "page {y}" just replace the text in the {} with the current page number.
+  }
 """
 import os
 import tempfile
@@ -673,6 +669,7 @@ def number_pdf(file, options):
     is_underlined = options.get('isUnderlined', False)
     color = options.get('color', '#000000')
     font = options.get('font', 'Helvetica')
+    text = options.get('text', '{n}')
 
     # Convert hex color to RGB
     color = Color(*[int(color[i:i+2], 16)/255 for i in (1, 3, 5, 7)])
@@ -694,6 +691,8 @@ def number_pdf(file, options):
     elif is_italic:
         font += "-Oblique"
 
+    total_pages = len(input_pdf.pages)
+
     for i, page in enumerate(input_pdf.pages):
         packet = tempfile.NamedTemporaryFile(delete=False)
 
@@ -708,8 +707,10 @@ def number_pdf(file, options):
         y = margin if bulletPosition[0] == 'bottom' else page.mediabox[3] - margin
         x = margin if bulletPosition[1] == 'left' else page.mediabox[2] - margin if bulletPosition[1] == 'right' else page.mediabox[2] / 2
 
+        # Generate the page number string
+        page_number = text.replace('{n}', str(i + 1)).replace('{x}', str(total_pages)).replace('{total}', str(total_pages))
+
         # Draw the page number
-        page_number = f'{i + 1}'
         can.drawString(x, y, page_number)
 
         # Draw underline if needed
