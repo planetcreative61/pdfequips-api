@@ -22,10 +22,14 @@ from routes.pdf2text import pdf_to_text_route
 from routes.split_by_range import split_by_range_route
 from routes.number_pdf import number_pdf_route
 from routes.get_md_files import get_md_files
+from routes.ocr_pdf import ocr_pdf_route
 # from routes.translate_pdf import translate_pdf_route
 import logging
 logging.basicConfig(filename='app.log', level=logging.DEBUG)
 
+# Setting the TESSDATA_PREFIX environment variable 
+import os
+os.environ['TESSDATA_PREFIX'] = "/usr/lib/x86_64-linux-gnu/pkgconfig/tesseract.pc"
 
 app = Flask(__name__)
 
@@ -68,6 +72,7 @@ get_md_files(app)
 # markdown_to_pdf_route(app)
 md_text_to_pdf_route(app)
 md_to_pdf_route(app)
+ocr_pdf_route(app)
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True, port=5000, use_reloader=True)
     # app.run(host='0.0.0.0', port=5000, debug=True)

@@ -13,3 +13,4 @@ pikepdf
 reportlab
 flask_cors
 requests
+pytesseract
