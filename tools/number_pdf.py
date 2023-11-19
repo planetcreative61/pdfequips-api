@@ -624,7 +624,10 @@
 
 
 """
-  the number_pdf function is working fine, but the options parameter might have a text property.
+  the number_pdf function is working fine,
+  the options parameter might also have a startPage property which specifies the page number where to start numbering default is 0, if it's not set but if it's set like let's say 3 then start numbering pages starting from the rangeToNumber.start property of the options and end in the rangeToNumber.end
+  meaning that the options parameter might also have a rangeToNumber property.
+  the options parameter might also have a text property.
   text: string representing string to insert for page number for example page 1, page 2, possible values:
   'insert only page number (recommended)',
   'page {n}' as in <page 1>,
@@ -650,8 +653,66 @@ from reportlab.lib.colors import Color
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+
+
+
+
+
+
+import os
+import tempfile
+from PyPDF2 import PdfReader, PdfWriter
+from reportlab.pdfgen import canvas
+from reportlab.lib.colors import black
+from reportlab.lib.colors import Color
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+"""
+  the options i sent: {'margin': 'recommended', 'bulletPosition': 'bottom center', 'font': 'Arial', 'startPage': 2, 'rangeToNumber': {'start': 2, 'end': 3}, 'text': '', 'fontSize': 12, 'documentLanguage': 'en', 'isBold': False, 'isItalic': False, 'isUnderlined': False, 'color': '#000000ff', 'firstPageIsCover': False}
+  the errors i get: 
+  Traceback (most recent call last):
+  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 2548, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 2528, in wsgi_app
+    response = self.handle_exception(e)
+  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/workspace/pdfequips-api/routes/number_pdf.py", line 25, in number_pdf_file
+    result = number_pdf(files[0], options)
+  File "/workspace/pdfequips-api/tools/number_pdf.py", line 716, in number_pdf
+    page.merge_page(watermark.pages[0])
+  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/PyPDF2/_page.py", line 2077, in __getitem__
+    raise IndexError("sequence index out of range")
+IndexError: sequence index out of range
+"""
+
+
+import os
+import tempfile
+from PyPDF2 import PdfReader, PdfWriter
+from reportlab.pdfgen import canvas
+from reportlab.lib.colors import black
+from reportlab.lib.colors import Color
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+
+
+
 def number_pdf(file, options):
     # Step 1: Store the file as a temporary file
+    print(options)
     temp_dir = tempfile.gettempdir()
     temp_file = os.path.join(temp_dir, file.filename)
     file.save(temp_file)
@@ -660,77 +721,49 @@ def number_pdf(file, options):
     output_pdf = PdfWriter()
     input_pdf = PdfReader(temp_file)
 
-    # Define margin and font size
-    margin_map = {'small': 10, 'recommended': 20, 'big': 30}
-    margin = margin_map.get(options.get('margin', 'recommended'))
-    font_size = options.get('fontSize', 12)
-    is_bold = options.get('isBold', False)
-    is_italic = options.get('isItalic', False)
-    is_underlined = options.get('isUnderlined', False)
-    color = options.get('color', '#000000')
-    font = options.get('font', 'Helvetica')
-    text = options.get('text', '{n}')
-
-    # Convert hex color to RGB
-    color = Color(*[int(color[i:i+2], 16)/255 for i in (1, 3, 5, 7)])
-
-    # Map font names
-    font_map = {
-        'arial': 'Helvetica',
-        'courier-new': 'Courier',
-        'helvetica': 'Helvetica',
-        'times-new-roman': 'Times-Roman'
-    }
-    font = font_map.get(font.lower(), 'Helvetica')
-
-    # Set font style
-    if is_bold and is_italic:
-        font += "-BoldOblique"
-    elif is_bold:
-        font += "-Bold"
-    elif is_italic:
-        font += "-Oblique"
-
-    total_pages = len(input_pdf.pages)
+    start_page = options.get('startPage', 0)
+    range_to_number = options.get('rangeToNumber', {'start': 0, 'end': len(input_pdf.pages)})
+    text = options.get('text', 'insert only page number (recommended)')
 
     for i, page in enumerate(input_pdf.pages):
-        packet = tempfile.NamedTemporaryFile(delete=False)
+        if range_to_number['start'] <= i <= range_to_number['end']:
+            fd, path = tempfile.mkstemp()
+            packet = open(path, 'wb')
 
-        # Create a new PDF canvas with the page number
-        can = canvas.Canvas(packet)
-        can.setFontSize(font_size)
-        can.setFillColor(color)
-        can.setFont(font, font_size)
+            # Create a new PDF canvas with the page number
+            can = canvas.Canvas(packet)
+            
+            # Determine the position of the page number
+            bulletPosition = options.get('bulletPosition', 'bottom center').split()
+            y = 10 if bulletPosition[0] == 'bottom' else page.mediabox[3] - 10
+            x = 10 if bulletPosition[1] == 'left' else page.mediabox[2] - 10 if bulletPosition[1] == 'right' else page.mediabox[2] / 2
 
-        # Determine the position of the page number
-        bulletPosition = options.get('bulletPosition', 'bottom center').split()
-        y = margin if bulletPosition[0] == 'bottom' else page.mediabox[3] - margin
-        x = margin if bulletPosition[1] == 'left' else page.mediabox[2] - margin if bulletPosition[1] == 'right' else page.mediabox[2] / 2
+            page_number = i + start_page
+            if text == 'insert only page number (recommended)':
+                can.drawString(x, y, f'{page_number}')
+            elif text == 'page {n}':
+                can.drawString(x, y, f'page {page_number}')
+            elif text == 'page {n} of {x}':
+                can.drawString(x, y, f'page {page_number} of {len(input_pdf.pages)}')
+            else:
+                custom_text = text.replace('{n}', str(page_number)).replace('{x}', str(len(input_pdf.pages)))
+                can.drawString(x, y, custom_text)
 
-        # Generate the page number string
-        page_number = text.replace('{n}', str(i + 1)).replace('{x}', str(total_pages)).replace('{total}', str(total_pages))
+            can.save()
 
-        # Draw the page number
-        can.drawString(x, y, page_number)
+            # Close the packet file
+            packet.close()
 
-        # Draw underline if needed
-        if is_underlined:
-            can.line(x, y, x + can.stringWidth(page_number, font, font_size), y)
+            # Merge the page number canvas with the original page
+            watermark = PdfReader(path)
+            page.merge_page(watermark.pages[0])
 
-        can.save()
+            # Delete the temporary file
+            os.close(fd)
+            os.remove(path)
 
-        # Move to the beginning of the StringIO buffer
-        packet.seek(0)
-
-        # Merge the page number canvas with the original page
-        watermark = PdfReader(packet)
-        page.merge_page(watermark.pages[0])
-
-        # Add the modified page to the output PDF
+        # Add the page (modified or not) to the output PDF
         output_pdf.add_page(page)
-
-        # Close the temporary file
-        packet.close()
 
     # Step 3: Save the modified PDF with page numbers
     output_file = os.path.join(temp_dir, 'numbered_pdf.pdf')
