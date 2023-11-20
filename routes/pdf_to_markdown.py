@@ -1,3 +1,9 @@
+"""
+    this is a pdf-to-markdown route handler, i want another similar function but for /api/pdf-to-html
+    everything is the same except for the fuction used for the conversion i.e instead of pdf_to_markdown and pdf_to_markdown_multiple
+    use pdf_to_html, pdf_to_html_multiple
+"""
+
 import os
 import shutil
 from flask import request, jsonify, send_file, after_this_request
