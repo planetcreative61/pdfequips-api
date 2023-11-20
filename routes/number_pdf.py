@@ -1,3 +1,8 @@
+"""
+    please give me a route function similar to the below number_pdf_route handler but for /api/pdf-to-markdown
+    the difference is that this time we should use a pdf_to_markdown function instead of number_pdf function to do the conversion
+    also there are no options json and other than that everything is pretty much the same.
+"""
 import os
 import shutil
 from flask import request, jsonify, send_file, after_this_request
