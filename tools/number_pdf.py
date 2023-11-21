@@ -1,3 +1,6 @@
+"""
+    now also consider this number_pdf function which is also working fine,
+"""
 import os
 import tempfile
 from PyPDF2 import PdfReader, PdfWriter
@@ -6,6 +9,7 @@ from reportlab.lib.colors import black
 from reportlab.lib.colors import Color
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from languages import languages
 
 def number_pdf(file, options):
     # Step 1: Store the file as a temporary file
