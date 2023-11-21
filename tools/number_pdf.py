@@ -632,8 +632,33 @@ from reportlab.lib.colors import Color
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+
+"""
+    When we choose the ‘Facing pages’ option,
+    the pages are arranged in pairs, with the left and right pages forming a spread.
+    This allows you to design your document with the understanding that the reader will see two pages at once.
+    The position of the page numbers in a PDF file can change when the layout is set to ‘Facing pages’. In this layout,
+    the page numbers are usually placed on the outside corners of the pages, rather than the inside corners as in the single page layout. This is because the inside corners of the pages are often obscured by the binding when the document is printed and bound1.
+
+    we should position the nubmers as before if they coose "top center" or "bottom center" for the bulletPosition.
+    but when they choose one of the corners for the bulletPosition i.e "top left" | "top right" | "bottom left" | "bottom right"
+    if they choose "top left" {
+        each odd number page should be numbered on "top right" and each even number page should be numbered "top left"
+        for example page 1 should be numbered "top right" and page 2 number should appear "top left".
+    } same thing for "bottom left" but on the bottom side.
+
+    if they choose "top right" {
+        this is the opposite of "top left"
+        i.e 
+        each odd number page should be numbered on "top left" and each even number page should be numbered "top right"
+        for example page 1 should be numbered "top left" and page 2 number should appear "top right".
+    } same thing for "bottom right" but on the bottom side.
+    this should happen with taking the value of firstPageIsCover (if true) into consideration.
+    i.e if firstPageIsCover then the first page of the pdf should not be counted as the first page of the pdf file when numbering right?
+"""
 def number_pdf(file, options):
     # Step 1: Store the file as a temporary file
+    print(options)
     temp_dir = tempfile.gettempdir()
     temp_file = os.path.join(temp_dir, file.filename)
     file.save(temp_file)
@@ -645,6 +670,7 @@ def number_pdf(file, options):
     start_page = options.get('startPage', 0)
     range_to_number = options.get('rangeToNumber', {'start': 0, 'end': len(input_pdf.pages)})
     text = options.get('text', 'insert only page number (recommended)')
+    first_page_is_cover = options.get('firstPageIsCover', False)
 
     # Define margin and font size
     margin_map = {'small': 10, 'recommended': 20, 'big': 30}
@@ -677,7 +703,7 @@ def number_pdf(file, options):
         font += "-Oblique"
 
     for i, page in enumerate(input_pdf.pages):
-        if range_to_number['start'] <= i <= range_to_number['end']:
+        if range_to_number['start'] <= i <= range_to_number['end'] and not (first_page_is_cover and i == 0):
             fd, path = tempfile.mkstemp()
             packet = open(path, 'wb')
 
