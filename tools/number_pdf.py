@@ -1,6 +1,3 @@
-"""
-    now also consider this number_pdf function which is also working fine,
-"""
 import os
 import tempfile
 from PyPDF2 import PdfReader, PdfWriter
@@ -9,11 +6,20 @@ from reportlab.lib.colors import black
 from reportlab.lib.colors import Color
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from languages import languages
+from numerics import numerics
+
+"""
+    consider the function number_pdf below, which is working fine.
+    and it's adding numbers to the pdf file passed to it and it's using 0-9 numerics but this is not what i want.
+    the options object might also contain a documentLanguage property which is a language code like "en", "fr", "es" or "ar".
+    and i already have a numerics object which is a list of all the possible numerics. and the documentLanguage is basically a key of the numerics object.
+    the numerics looks somthing like this: numerics = { "ab": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ], "aa": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ], "af": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ], "ak": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ], "sq": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ], "am": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ], "ar": [ "٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩" ], "an": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ], "hy": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ], "as": [ "০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯" ], "av": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ],...]
+    that means that based on the documentLanguage the numbers used to number the pdf file may very.
+    please give me the complete code solution to this problem and also tell me what might be the best practice or best approach to solve this problem.
+"""
 
 def number_pdf(file, options):
     # Step 1: Store the file as a temporary file
-    print(options)
     temp_dir = tempfile.gettempdir()
     temp_file = os.path.join(temp_dir, file.filename)
     file.save(temp_file)
