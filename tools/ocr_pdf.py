@@ -28,40 +28,7 @@ import subprocess
 import os
 
 
-"""
-    the below ocr_pdf function is suppose to convert a scanned pdf file into a selectable and serchable version of the same document and preserving styleing and fonts and layouts and everthing from the oririnal document.
-    but i got these errors:
-     * Debug mode: on
-Tesseract Open Source OCR Engine v4.1.1 with Leptonica
-Error in pixReadStream: Pdf reading is not supported
-Error in pixRead: pix not read
-Error during processing.
-Traceback (most recent call last):
-  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 2548, in __call__
-    return self.wsgi_app(environ, start_response)
-  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 2528, in wsgi_app
-    response = self.handle_exception(e)
-  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask_cors/extension.py", line 176, in wrapped_function
-    return cors_after_request(app.make_response(f(*args, **kwargs)))
-  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
-    response = self.full_dispatch_request()
-  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask_cors/extension.py", line 176, in wrapped_function
-    return cors_after_request(app.make_response(f(*args, **kwargs)))
-  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
-  File "/workspace/pdfequips-api/routes/ocr_pdf.py", line 28, in ocr_pdf_file
-    response = send_file(result, mimetype='application/pdf', as_attachment=True, download_name='ocr_result.pdf', conditional=True)
-  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/flask/helpers.py", line 537, in send_file
-    return werkzeug.utils.send_file(  # type: ignore[return-value]
-  File "/workspace/pdfequips-api/.venv/lib/python3.10/site-packages/werkzeug/utils.py", line 440, in send_file
-    stat = os.stat(path)
-FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpusmymbbv.pdf_ocr.pdf'
 
-"""
 import os
 import subprocess
 import tempfile
@@ -71,21 +38,38 @@ def ocr_pdf(file, o):
     # create a temporary file to save the uploaded file
     tmp_file = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
     file.save(tmp_file.name)
+    print(f"Saved uploaded file to {tmp_file.name}")
     
-    # convert the PDF to an image using Ghostscript
-    img_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
-    subprocess.run(["gs", "-sDEVICE=png16m", "-r300", "-o", img_file.name, tmp_file.name])
+    # convert the PDF to images using Ghostscript
+    # each page will be output as a separate image
+    img_files = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+    subprocess.run(["gs", "-sDEVICE=png16m", "-r300", "-o", img_files.name + "%d", tmp_file.name])
+    print(f"Converted PDF to images: {img_files.name}%d")
     
-    # use tesseract to convert the image into a selectable pdf file
+    # use tesseract to convert each image into a selectable pdf file
     # you need to have tesseract installed on your system and in your PATH
     # you can also specify other options for tesseract, such as language or output format
     # see the documentation for more details: [1]
-    output_file = tmp_file.name + "_ocr"
-    subprocess.run(["tesseract", img_file.name, output_file, "-l", "eng", "pdf"])
+    output_files = []
+    for i in range(1, 100):  # assuming the PDF has less than 100 pages
+        if os.path.exists(img_files.name + str(i)):
+            output_file = tmp_file.name + "_ocr" + str(i)
+            subprocess.run(["tesseract", img_files.name + str(i), output_file, "-l", "eng", "pdf"])
+            print(f"Processed image with Tesseract: {output_file}.pdf")
+            output_files.append(output_file + ".pdf")
+        else:
+            break
+    
+    # combine the output files into a single PDF
+    final_output_file = tmp_file.name + "_ocr_final.pdf"
+    subprocess.run(["gs", "-dBATCH", "-dNOPAUSE", "-q", "-sDEVICE=pdfwrite", "-sOutputFile=" + final_output_file] + output_files)
+    print(f"Combined output files into: {final_output_file}")
     
     # delete the temporary files
     os.remove(tmp_file.name)
-    os.remove(img_file.name)
+    for i in range(1, len(output_files) + 1):
+        os.remove(img_files.name + str(i))
+        os.remove(tmp_file.name + "_ocr" + str(i) + ".pdf")
     
     # return the output file name
-    return output_file
+    return final_output_file
