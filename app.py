@@ -29,10 +29,6 @@ from routes.pdf_to_html import pdf_to_html_route
 import logging
 logging.basicConfig(filename='app.log', level=logging.DEBUG)
 
-# Setting the TESSDATA_PREFIX environment variable 
-import os
-os.environ['TESSDATA_PREFIX'] = "/usr/lib/x86_64-linux-gnu/pkgconfig/tesseract.pc"
-
 app = Flask(__name__)
 
 # cors
