@@ -1,34 +1,3 @@
-import io
-import os
-import tempfile
-import pytesseract
-
-"""
-   this ocr_pdf function takes a flask file object that needs to be saved as a tmp file before processing,
-   and it also takes a selectedLanguages which is a list of language codes like "en" or "fr" and so on.
-   it should increase the accurecy of the OCR.
-   please show me how can we solve this problem?
-"""
-
-
-
-from PyPDF2 import PdfWriter, PdfReader
-from PIL import Image
-import pytesseract
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-import io
-import os
-
-
-
-
-import tempfile
-import subprocess
-import os
-
-
-
 import os
 import subprocess
 import tempfile
