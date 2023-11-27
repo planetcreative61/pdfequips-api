@@ -26,6 +26,7 @@ from routes.ocr_pdf import ocr_pdf_route
 from routes.pdf_to_markdown import pdf_to_markdown_route
 from routes.pdf_to_html import pdf_to_html_route
 from routes.remove_pages import remove_pages_route
+from routes.organize_pdf import organize_pdf_route
 # from routes.translate_pdf import translate_pdf_route
 import logging
 logging.basicConfig(filename='app.log', level=logging.DEBUG)
@@ -75,6 +76,7 @@ ocr_pdf_route(app)
 pdf_to_markdown_route(app)
 pdf_to_html_route(app)
 remove_pages_route(app)
+organize_pdf_route(app)
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True, port=5000, use_reloader=True)
     # app.run(host='0.0.0.0', port=5000, debug=True)

@@ -2,12 +2,12 @@ import os
 import shutil
 from flask import request, jsonify, send_file, after_this_request
 from utils.utils import validate_file
-from tools.remove_pages import remove_pages
+from tools.organize_pdf import organize_pdf
 import json
 
-def remove_pages_route(app):
-    @app.route('/api/remove-pages', methods=['POST'])
-    def remove_pdf_pages():
+def organize_pdf_route(app):
+    @app.route('/api/organize-pdf', methods=['POST'])
+    def organize_pdf_files():
         if 'files' not in request.files:
             return jsonify({"error": "No PDF file provided"}), 400
         
@@ -17,11 +17,10 @@ def remove_pages_route(app):
             response = jsonify(error)
             response.headers['Content-Type'] = 'application/json'
             return jsonify({"error": response}), 400
-        
-        selectedPages = request.form.get('selectedPages')
+        pageOrders = json.loads(request.form.get('pageOrders'))
         
         if len(files) == 1:
-            result = remove_pages(files[0], selectedPages)
+            result = organize_pdf(files[0], pageOrders)
             
             response = send_file(result, mimetype='application/pdf', as_attachment=True, download_name='ocr_result.pdf', conditional=True)
             
